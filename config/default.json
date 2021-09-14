@@ -1,3 +1,4 @@
 {
-  "mongoURI": "mongodb+srv://m001-user:NvncCBKYQfCnQQS5@cluster0.adkbi.mongodb.net/dev-connector?retryWrites=true&w=majority"
+  "mongoURI": "mongodb+srv://m001-user:NvncCBKYQfCnQQS5@cluster0.adkbi.mongodb.net/dev-connector?retryWrites=true&w=majority",
+  "jwtSecret": "myJWTSecret"
 }
