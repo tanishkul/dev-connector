@@ -155,7 +155,7 @@ router.put('/unlike/:id', auth, async (req, res) => {
   }
 });
 
-// @route   POST api/comment/:id
+// @route   POST api/posts/comment/:id
 // @desc    Comment on post
 // @access  Private
 router.post(
@@ -187,7 +187,7 @@ router.post(
   }
 );
 
-// @route   DELETE api/comment/:id/:comment_id
+// @route   DELETE api/posts/comment/:id/:comment_id
 // @desc    Remove comment from post
 // @access  Private
 router.delete('/comment/:id/:comment_id', auth, async (req, res) => {
