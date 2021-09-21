@@ -1,25 +1,30 @@
 import React, { Fragment, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { getPost } from '../../actions/post';
 import Spinner from '../layouts/Spinner';
-import { getPosts } from '../../actions/post';
-import PostItem from './PostItem';
-import PostForm from './PostForm';
+import PostItem from '../posts/PostItem';
+import { Link } from 'react-router-dom';
+import CommentForm from './CommentForm';
+import CommentItem from './CommentItem';
 
-const Post = ({ getPosts, post: { posts, loading } }) => {
-  useEffect(() => getPosts(), [getPosts]);
-  return loading ? (
+const Post = ({ getPost, post: { post, loading }, match }) => {
+  useEffect(() => {
+    getPost(match.params.id);
+  }, [getPost, match.params.id]);
+
+  return loading || post === null ? (
     <Spinner />
   ) : (
     <Fragment>
-      <h1 class='large text-primary'>Posts</h1>
-      <p class='lead'>
-        <i class='fas fa-user'></i> Welcome to the community!
-      </p>
-      <PostForm />
-      <div className='posts'>
-        {posts.map(post => (
-          <PostItem key={post._id} post={post} />
+      <Link to='/posts' className='btn'>
+        Back To Posts
+      </Link>
+      <PostItem post={post} showActions={false} />
+      <CommentForm postId={post._id} />
+      <div className='comments'>
+        {post.comments.map(comment => (
+          <CommentItem key={comment._id} postId={post._id} comment={comment} />
         ))}
       </div>
     </Fragment>
@@ -27,7 +32,7 @@ const Post = ({ getPosts, post: { posts, loading } }) => {
 };
 
 Post.propTypes = {
-  getPosts: PropTypes.func.isRequired,
+  getPost: PropTypes.func.isRequired,
   post: PropTypes.object.isRequired,
 };
 
@@ -35,4 +40,4 @@ const mapStateToProps = state => ({
   post: state.post,
 });
 
-export default connect(mapStateToProps, { getPosts })(Post);
+export default connect(mapStateToProps, { getPost })(Post);
