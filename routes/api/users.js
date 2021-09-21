@@ -1,9 +1,10 @@
 const express = require('express');
 const gravatar = require('gravatar');
 const bcrypt = require('bcrypt');
-const User = require('../../models/Users');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const normalize = require('normalize-url');
+const User = require('../../models/Users');
 
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
@@ -39,11 +40,14 @@ router.post(
       }
 
       // Get users gravatar
-      const avatar = await gravatar.url(email, {
-        s: '200',
-        r: 'pg',
-        d: 'mm',
-      });
+      const avatar = normalize(
+        gravatar.url(email, {
+          s: '200',
+          r: 'pg',
+          d: 'mm',
+        }),
+        { forceHttps: true }
+      );
 
       user = new User({
         name,

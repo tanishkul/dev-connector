@@ -1,6 +1,7 @@
 const express = require('express');
-const request = require('request');
+const axios = require('axios');
 const config = require('config');
+const normalize = require('normalize-url');
 const router = express.Router();
 const auth = require('../../middleware/auth');
 const User = require('../../models/Users');
@@ -64,7 +65,8 @@ router.post(
       const profileFields = {};
       profileFields.user = req.user.id;
       if (company) profileFields.company = company;
-      if (website) profileFields.website = website;
+      if (website)
+        profileFields.website = normalize(website, { forceHttps: true });
       if (location) profileFields.location = location;
       if (status) profileFields.status = status;
       if (bio) profileFields.bio = bio;
@@ -74,11 +76,22 @@ router.post(
       }
 
       profileFields.social = {};
-      if (youtube) profileFields.social.youtube = youtube;
-      if (twitter) profileFields.social.twitter = twitter;
-      if (facebook) profileFields.social.facebook = facebook;
-      if (linkedIn) profileFields.social.linkedIn = linkedIn;
-      if (instagram) profileFields.social.instagram = instagram;
+      if (youtube)
+        profileFields.social.youtube = normalize(youtube, { forceHttps: true });
+      if (twitter)
+        profileFields.social.twitter = normalize(twitter, { forceHttps: true });
+      if (facebook)
+        profileFields.social.facebook = normalize(facebook, {
+          forceHttps: true,
+        });
+      if (linkedIn)
+        profileFields.social.linkedIn = normalize(linkedIn, {
+          forceHttps: true,
+        });
+      if (instagram)
+        profileFields.social.instagram = normalize(instagram, {
+          forceHttps: true,
+        });
       let profile = await Profile.findOne({ user: req.user.id });
 
       if (profile) {
@@ -288,22 +301,16 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
 // @access  Public
 router.get('/github/:username', async (req, res) => {
   try {
-    const options = {
-      uri: `https://api.github.com/users/${
-        req.params.username
-      }/repos?per_page=5&sort=created;asc&client_id=${config.get(
-        'githubClientId'
-      )}&client_secret=${config.get('githubClientSecret')}}`,
-      method: 'GET',
-      headers: { 'user-agent': 'node.js' },
+    const uri = encodeURI(
+      `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc`
+    );
+    const headers = {
+      'user-agent': 'node.js',
+      Authorization: `token ${config.get('githubToken')}`,
     };
-    request(options, (error, response, body) => {
-      if (error) console.error(error);
-      if (response.statusCode !== 200) {
-        return res.status(404).json({ msg: 'No github profile found' });
-      }
-      return res.json(JSON.parse(body));
-    });
+
+    const gitHubResponse = await axios.get(uri, { headers });
+    return res.json(gitHubResponse.data);
   } catch (error) {
     console.error(error.message);
     return res.status(500).send('Server error');
